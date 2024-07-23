@@ -2,14 +2,17 @@
 
 Just a collection of C++ headers containing implementations for common things so I don't have to keep rewriting them.
 
-Author: Adam "beckadamtheinventor" Beckingham
-License: MIT
+Author: Adam "beckadamtheinventor" Beckingham.
+
+License: MIT.
 
 
 ## Data Classes
 
-+ Array2D<T>
-+ Dictionary<T>
++ Array2D
++ Dictionary
++ DynamicArray
++ SimpleConfig::Config
 
 
 ## Static Classes
