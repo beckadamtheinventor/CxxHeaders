@@ -16,62 +16,56 @@ struct ArrayIndex {
 template<class T>
 class Array2D {
     size_t w, h, l;
-    T** values;
+    T* values;
     public:
-    /* Construct an empty 2D array. */
     Array2D<T>() : Array2D<T>(0, 0) {}
-    /* Construct a 2D array of size width * height */
+	/* Construct a new Array2D of a given width and height. */
     Array2D<T>(size_t width, size_t height) {
 		values = nullptr;
-		resize(width, height);
+        resize(width, height);
     }
-    /* Construct a 2D array of size width * height from existing values */
-    Array2D<T>(size_t width, size_t height, T* values) : Array2D<T>(width, height) {
-        size_t i = 0;
-        for (size_t y = 0; y < height; y++) {
-            T* row = values[y];
-            for (size_t x = 0; x < width; x++) {
-                row[x] = values[i++];
-            }
+	/* Construct a new Array2D from existing data */
+    Array2D<T>(size_t width, size_t height, T* data) : Array2D<T>(width, height) {
+        for (size_t i=0; i<l; i++) {
+            values[i] = data[i];
         }
     }
-    /* Resize a 2D Array. Note: Destroys the data. */
-	void resize(size_t width, size_t height) {
-		if (values != nullptr) {
-			delete values;
-		}
+	/* Return width of the Array */
+    size_t width() {
+        return w;
+    }
+	/* Return height of the Array */
+    size_t height() {
+        return h;
+    }
+	/* Return size of the Array. */
+    size_t size() {
+        return l;
+    }
+	/* Resize the Array. Note: destroys the data. */
+    void resize(size_t width, size_t height) {
         w = width;
         h = height;
         l = w * h;
         if (l > 0) {
-            values = new T*[height];
-            for (size_t i = 0; i < height; i++) {
-                values[i] = new T[width];
-            }
+			if (values != nullptr) {
+				delete values;
+			}
+            values = new T[l];
         } else {
             values = nullptr;
         }
-	}
-	
-    /* Returns the width of the 2D Array. */
-    size_t width() {
-        return w;
     }
-    /* Returns the height of the 2D Array. */
-    size_t height() {
-        return h;
-    }
-    /* Returns the size (width*height) of the 2D Array. */
-    size_t size() {
-        return l;
-    }   
-    /* Get/Set an item in the array.
-       Note: ArrayIndex can be easily constructed with brackets. ({x, y}) */
+	/* Get/Set an item in the Array.
+	   Note: brackets can be used to easily construct the index ({x, y}) */
     T& operator[](ArrayIndex i) {
         if (i.x < w && i.y < h) {
-            return values[i.y][i.x];
+            return values[i.y * w + i.x];
         }
         printf("Array2D Index out of range\n");
         throw std::exception();
+    }
+    operator T*() {
+        return values;
     }
 };

@@ -31,11 +31,12 @@ Constructors:
 + `Array2D<class T>(size_t width, size_t height, T* values);` Construct a 2D Array of width x height from existing values.
 
 Member Functions:
-+ ```size_t width();``` Returns width of the 2D array.
-+ ```size_t height();``` Returns height of the 2D array.
-+ ```size_t size();``` Returns size (width x height) of the 2D array.
-+ ```T& operator[](ArrayIndex i)``` Get/Set a value in the 2D array. Note: ArrayIndex can be easily constructed with brackets. (`{x, y}`)
-
++ `size_t width();` Returns width of the 2D array.
++ `size_t height();` Returns height of the 2D array.
++ `size_t size();` Returns size (width x height) of the 2D array.
++ `void resize(size_t width, size_t height)` Resize the 2D array. Destroys all data.
++ `T& operator[](ArrayIndex i)` Get/Set a value in the 2D array. Note: ArrayIndex can be easily constructed with brackets. (`{x, y}`)
++ `operator T*()` Get a pointer to the Array's values in a flat array.
 
 
 ## AssetPath.hpp
