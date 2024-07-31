@@ -28,6 +28,10 @@ class Registry {
             delete _entries[i];
         }
     }
+    /* Get the number of registered entries. */
+    size_t length() {
+        return _entries.length();
+    }
     /* Add a new key:value pair to the registry, returning a pointer to it.
      * Note that the value should be allocated with the "new" operator.
      */
@@ -58,11 +62,19 @@ class Registry {
 		return id < _entries.length();
 	}
     /* Get a registry entry given an integer id. */
-	T& get(size_t id) {
+	T* get(size_t id) {
 		if (has(id)) {
 			return _entries[id];
 		}
         printf("Registry ID %llu out of range.\n", id);
 		throw std::exception();
 	}
+    /* Get a registry key given an integer id. */
+    const char* keys(size_t id) {
+        if (has(id)) {
+            return _dict.keys(id);
+        }
+        printf("Registry ID %llu out of range.\n", id);
+        throw std::exception();
+    }
 };

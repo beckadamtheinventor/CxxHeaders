@@ -4,6 +4,8 @@
  */
 #pragma once
 
+#include <cstddef>
+
 template<class T, size_t MIN_ALLOC=256>
 class DynamicArray {
     size_t len;
@@ -66,7 +68,7 @@ class DynamicArray {
                 delete items;
             }
             items = newitems;
-            alloc = len = size;
+            alloc = size;
         } else {
             delete items;
             items = nullptr;
