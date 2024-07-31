@@ -34,7 +34,7 @@ class Registry {
     T* add(const char *key, T* v) {
         size_t id = nextid();
         _entries.append(v);
-        _dict.append(key, v);
+        _dict.append(key, id);
         return v;
     }
     /* Create a new key:empty pair in the registry, returning a pointer to it. */
