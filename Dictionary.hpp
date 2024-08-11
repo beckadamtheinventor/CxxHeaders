@@ -54,7 +54,7 @@ class Dictionary {
     Sym *lastaccess = nullptr;
     DynamicArray<Sym, MIN_ALLOC>* buckets[BUCKETS] = {nullptr};
 
-    Sym* getsym(const char *key) {
+    Sym* getsym(const char *key, bool create=true) {
         size_t h = _hash(key);
         if (lastaccess != nullptr && h == lastaccess->hash) {
             if (!strcmp(key, lastaccess->key)) {
@@ -73,9 +73,12 @@ class Dictionary {
                 }
             }
         }
-        Sym *sym = &bucket->append(Sym(_dupcstr(key)));
-        len++;
-        return sym;
+		if (create) {
+			Sym *sym = &bucket->append(Sym(_dupcstr(key)));
+			len++;
+			return sym;
+		}
+		return nullptr;
     }
     Sym* getsym(size_t i) {
         if (i < len) {
