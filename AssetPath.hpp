@@ -4,6 +4,7 @@
  */
 #pragma once
 
+#include <cstdio>
 #include <cstring>
 static const char *assetPathTextures = "assets/textures/";
 static const char *assetPathObjects = "assets/objects/";
@@ -14,17 +15,18 @@ static char assetPathBuffer[512] = {0};
 
 class AssetPath {
     public:
-	/* Return a path to "<path>/<name>.<type>". Writes the data to p. */
+	/* Return a path to "<path><name>.<type>". Writes the data to p. */
     static char* concat(char *p, const char *path, const char *name, const char *type) {
         memcpy(p, path, strlen(path));
         memcpy(&p[strlen(path)], name, strlen(name));
-        if (type != nullptr) {
-            p[strlen(path)+strlen(name)] = '.';
-            memcpy(&p[strlen(name)+1], type, strlen(type));
-            p[strlen(path) + strlen(name) + 1 + strlen(type)] = 0;
-        } else {
+        if (type == nullptr || type[0] == 0) {
             p[strlen(path) + strlen(name)] = 0;
+        } else {
+            p[strlen(path) + strlen(name)] = '.';
+            memcpy(&p[strlen(path) + strlen(name) + 1], type, strlen(type));
+            p[strlen(path) + strlen(name) + 1 + strlen(type)] = 0;
         }
+        // printf("AssetPath: %s\n", p);
         return p;
     }
     /* Return a path to "assets/textures/<name>.<type>".

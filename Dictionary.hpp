@@ -125,7 +125,7 @@ class Dictionary {
     }
 	/* Returns true if the key is found in the Dictionary. */
     inline bool has(const char *key) {
-        return getsym(key) != nullptr;
+        return getsym(key, false) != nullptr;
     }
 	/* Get/Set a key:value pair in the Dictionary.
 	   key:value pair (default constructor for T value) is created if it doesn't exist. */
