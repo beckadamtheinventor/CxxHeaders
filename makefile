@@ -76,7 +76,7 @@ DEPS		:= $(OBJECTS:.o=.d)
 
 OUTPUTMAIN	:= $(call FIXPATH,$(OUTPUT)/$(MAIN))
 
-all: $(OUTPUT) DataTypes DictStressTest
+all: $(OUTPUT) DataTypes DictStressTest ConfigTest
 	@echo Executing 'all' complete!
 
 $(OUTPUT):
@@ -87,6 +87,9 @@ DataTypes:
 
 DictStressTest:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -o output/DictStressTest tests/DictStressTest.cpp $(LFLAGS) $(LIBS)
+
+ConfigTest:
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o output/ConfigTest tests/ConfigTest.cpp $(LFLAGS) $(LIBS)
 
 # include all .d files
 -include $(DEPS)
@@ -99,4 +102,5 @@ clean:
 run: all
 	$(call FIXPATH,output/DataTypes)
 	$(call FIXPATH,output/DictStressTest)
+	$(call FIXPATH,output/ConfigTest)
 	@echo Executing 'run: all' complete!
