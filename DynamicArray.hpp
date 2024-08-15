@@ -6,25 +6,26 @@
 
 #include <cstddef>
 
-template<class T, size_t MIN_ALLOC=256, class L=unsigned int>
+#define uint unsigned int
+template<class T, size_t MIN_ALLOC=256, class L=uint>
 class DynamicArray {
     L len;
     L alloc;
     T *items;
     public:
 	/* Construct an empty Dynamic Array (MIN_ALLOC items allocated) */
-    DynamicArray<T, MIN_ALLOC>() {
+    DynamicArray<T, MIN_ALLOC, L>() {
         len = alloc = 0;
         items = nullptr;
     }
 	/* Construct a Dynamic Array with size elements allocated. */
-    DynamicArray<T, MIN_ALLOC>(L size) {
+    DynamicArray<T, MIN_ALLOC, L>(L size) {
         len = 0;
         alloc = size;
         items = new T[alloc];
     }
 	/* Construct a Dynamic Array from existing elements. */
-    DynamicArray<T, MIN_ALLOC>(T* elements, L size) {
+    DynamicArray<T, MIN_ALLOC, L>(T* elements, L size) {
         len = alloc = size;
         items = new T[alloc];
         for (L i=0; i<alloc; i++) {
@@ -32,7 +33,7 @@ class DynamicArray {
         }
     }
 	/* Construct (deep copy) a Dynamic Array from another Dynamic Array. */
-	DynamicArray<T, MIN_ALLOC>(DynamicArray& other) {
+	DynamicArray<T, MIN_ALLOC, L>(DynamicArray& other) {
 		alloc = len = other.length();
 		items = new T[alloc];
 		for (L i=0; i<alloc; i++) {
@@ -129,3 +130,4 @@ class DynamicArray {
         return items;
     }
 };
+#undef uint
