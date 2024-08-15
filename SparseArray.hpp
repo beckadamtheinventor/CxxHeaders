@@ -5,7 +5,7 @@
 template<class T, size_t CHUNK_SIZE=16, size_t MIN_ALLOC=16>
 class SparseArray {
     protected:
-    DynamicArray<DynamicArray<T, CHUNK_SIZE>, MIN_ALLOC> _buckets;
+    DynamicArray<T[CHUNK_SIZE], MIN_ALLOC> _buckets;
     public:
     SparseArray<T>() {}
     SparseArray<T>(T* values, unsigned int count) {
