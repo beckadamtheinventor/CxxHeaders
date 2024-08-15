@@ -6,29 +6,28 @@
 
 #include <cstddef>
 
-template<class T, size_t MIN_ALLOC=256>
+template<class T, size_t MIN_ALLOC=256, class L=unsigned int>
 class DynamicArray {
-    size_t len;
-    size_t alloc;
+    L len;
+    L alloc;
     T *items;
     public:
 	/* Construct an empty Dynamic Array (MIN_ALLOC items allocated) */
     DynamicArray<T, MIN_ALLOC>() {
-        len = 0;
-        alloc = MIN_ALLOC;
-        items = new T[alloc];
+        len = alloc = 0;
+        items = nullptr;
     }
 	/* Construct a Dynamic Array with size elements allocated. */
-    DynamicArray<T, MIN_ALLOC>(size_t size) {
+    DynamicArray<T, MIN_ALLOC>(L size) {
         len = 0;
         alloc = size;
         items = new T[alloc];
     }
 	/* Construct a Dynamic Array from existing elements. */
-    DynamicArray<T, MIN_ALLOC>(T* elements, size_t size) {
+    DynamicArray<T, MIN_ALLOC>(T* elements, L size) {
         len = alloc = size;
         items = new T[alloc];
-        for (size_t i=0; i<alloc; i++) {
+        for (L i=0; i<alloc; i++) {
             items[i] = elements[i];
         }
     }
@@ -36,31 +35,31 @@ class DynamicArray {
 	DynamicArray<T, MIN_ALLOC>(DynamicArray& other) {
 		alloc = len = other.length();
 		items = new T[alloc];
-		for (size_t i=0; i<alloc; i++) {
+		for (L i=0; i<alloc; i++) {
 			items[i] = other[i];
 		}
 	}
 	/* Clear the Array. Note: uses default constructor for T. */
     void clear() {
-        for (size_t i=0; i<len; i++) {
+        for (L i=0; i<len; i++) {
             items[i] = T();
         }
         len = 0;
     }
 	/* Return the number of items in the Array. */
-    size_t length() {
+    L length() {
         return len;
     }
 	/* Return the number of allocated items in the Array. */
-    size_t available() {
+    L available() {
         return alloc - len;
     }
 	/* Resize the Array to allocate more or less items. Note: can be zero. */
-    void resize(size_t size) {
+    void resize(L size) {
         if (size > 0) {
             T *newitems = new T[size];
             if (items != nullptr) {
-                for (size_t i=0; i<size; i++) {
+                for (L i=0; i<size; i++) {
                     if (i < len) {
                         newitems[i] = items[i];
                     }
@@ -77,7 +76,7 @@ class DynamicArray {
     }
 	/* Get/Set an item in the Array. Note: can be outside the bounds of the array to add items. Use with care.
 	   Resizes the array to contain i+MIN_ALLOC items if adding. */
-    T& get(size_t i) {
+    T& get(L i) {
         if (i >= alloc) {
             resize(i + MIN_ALLOC);
         }
@@ -88,11 +87,11 @@ class DynamicArray {
     }
 	/* Get/Set an item in the Array. Note: can be outside the bounds of the array to add items. Use with care.
 	   Resizes the array to contain i+MIN_ALLOC items if adding. */
-    inline T& operator[](size_t i) {
+    inline T& operator[](L i) {
         return get(i);
     }
 	/* Set an item in the array at a specified index. */
-    T& add(size_t i, T value) {
+    T& add(L i, T value) {
         return (get(i) = value);
     }
 	/* Add an item to the end of the Array. */
@@ -100,12 +99,12 @@ class DynamicArray {
         return add(len, value);
     }
 	/* Remove the item at index i. Note: copies all successive items back. Can be very slow. */
-    void remove(size_t i) {
+    void remove(L i) {
         if (len == 0) {
             return;
         }
         delete items[i];
-        for (size_t j=i; j<len-1; j++) {
+        for (L j=i; j<len-1; j++) {
             items[j] = items[j+1];
         }
         items[len-1] = T();
@@ -120,7 +119,7 @@ class DynamicArray {
             return nullptr;
         }
         T* newitems = new T[len];
-        for (size_t i=0; i<len; i++) {
+        for (L i=0; i<len; i++) {
             newitems[i] = items[i];
         }
         return newitems;
