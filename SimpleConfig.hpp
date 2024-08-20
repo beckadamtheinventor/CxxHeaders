@@ -1,21 +1,21 @@
+#ifndef __SIMPLE_CONFIG_HPP__
+#define __SIMPLE_CONFIG_HPP__
+#ifndef __cplusplus
+#error This header does not currently support C, only C++.
+#endif
 /* Bare-bones single-header binary serialized config library.
- * Author: Adam "beckadamtheinventor" Beckingham
- * License: MIT
- * Relies on Dictionary.hpp (which relies on DynamicArray.hpp)
+ * Authors: Adam "beckadamtheinventor" Beckingham
  *
  * Usage:
     SimpleConfig::Config config;
     // make sure to set defaults before loading from file
     config.add("SomeBoolValue", Value::fromBool(true));
+    config.setFloat("SomeFloatValue", 13.37f);
     // loading from file
     config.deserialize("file.dat");
     // saving to file
     config.serialize("file.dat");
  */
-#pragma once
-#ifndef __cplusplus
-#error This header does not currently support C, only C++.
-#endif
 
 // define CONFIG_FILE_HEADER before including this file to use a custom config file header 
 #ifndef CONFIG_FILE_HEADER
@@ -37,7 +37,7 @@ namespace SimpleConfig {
         if (len == 0) {
             len = strlen(str);
         }
-        char *s = new char[len + 1];
+        char* s = new char[len + 1];
         memcpy(s, str, len);
         s[len] = 0;
         return s;
@@ -53,7 +53,7 @@ namespace SimpleConfig {
         return -1;
     }
     static char* _deserializeString(std::istream* in) {
-        char *s = new char[256];
+        char* s = new char[256];
         char c;
         size_t i = 0;
         while ((c = in->get()) != '"') {
@@ -97,23 +97,29 @@ namespace SimpleConfig {
             TFALSE,
             TINTEGER,
             TUNSIGNED,
-            TFLOAT,
+            TDOUBLE,
             TSTRING,
+            TFLOAT,
+            TCHAR,
+            TBYTE,
         };
-        static const size_t INVALID_TYPE = TSTRING + 1;
+        static const size_t INVALID_TYPE = TBYTE + 1;
         Type type;
         unsigned int dummy;
         union {
             long long i;
             size_t u;
-            double f;
-            char *s;
+            double d;
+            float f;
+            char c;
+            unsigned char uc;
+            char* s;
         };
         Value() {
             type = TNONE;
             this->i = 0;
         }
-        static Value deserialize(char *buf, size_t l) {
+        static Value deserialize(char* buf, size_t l) {
             Value v = Value();
             if (l == 0) {
                 return v;
@@ -136,9 +142,9 @@ namespace SimpleConfig {
                             v.u = *(size_t*) &buf[1];
                         }
                         break;
-                    case TFLOAT:
+                    case TDOUBLE:
                         if (l >= sizeof(double) + 1) {
-                            v.f = *(double*) &buf[1];
+                            v.d = *(double*) &buf[1];
                         }
                         break;
                     case TSTRING:
@@ -147,6 +153,21 @@ namespace SimpleConfig {
                         } else {
                             v.s = _dupcstr((char*)&buf[1], l-1);
                         }
+                        break;
+                    case TFLOAT:
+                        if (l >= sizeof(float) + 1) {
+                            v.f = *(float*) &buf[1];
+                        }
+                        break;
+                    case TCHAR:
+                        if (l >= sizeof(char) + 1) {
+                            v.c = buf[1];
+                        }
+                    case TBYTE:
+                        if (l >= sizeof(char) + 1) {
+                            v.uc = buf[1];
+                        }
+                    default:
                         break;
                 }
             }
@@ -188,8 +209,8 @@ namespace SimpleConfig {
                         fl++;
                         c = in->get();
                     }
-                    v.type = TFLOAT;
-                    v.f = (double)n + (double)f * powl(0.1, fl-1);
+                    v.type = TDOUBLE;
+                    v.d = (double)n + (double)f * powl(0.1, fl-1);
                 } else {
                     if (negative) {
                         v.type = TINTEGER;
@@ -200,7 +221,7 @@ namespace SimpleConfig {
                     }
                     
                 }
-                in->seekg(-1, (std::ios_base::seekdir)SEEK_CUR);
+                in->unget();
             } else if (c == '"') {
                 v.type = TSTRING;
                 v.s = _deserializeString(in);
@@ -208,12 +229,6 @@ namespace SimpleConfig {
                     success = false;
                 }
             }
-            return v;
-        }
-        static Value fromBool(bool b) {
-            Value v = Value();
-            v.type = b ? TTRUE : TFALSE;
-            v.i = 0;
             return v;
         }
         static Value fromInteger(long long i) {
@@ -230,11 +245,23 @@ namespace SimpleConfig {
         }
         static Value fromDouble(double f) {
             Value v = Value();
+            v.type = TDOUBLE;
+            v.d = f;
+            return v;
+        }
+        static Value fromFloat(float f) {
+            Value v = Value();
             v.type = TFLOAT;
             v.f = f;
             return v;
         }
-        static Value fromString(const char *s) {
+        static Value fromBool(bool b) {
+            Value v = Value();
+            v.type = b ? TTRUE : TFALSE;
+            v.i = 0;
+            return v;
+        }
+        static Value fromString(const char* s) {
             Value v = Value();
             v.type = TSTRING;
             v.s = _dupcstr(s);
@@ -242,6 +269,18 @@ namespace SimpleConfig {
         }
         static Value fromString(std::string s) {
             return fromString(s.c_str());
+        }
+        static Value fromChar(char c) {
+            Value v = Value();
+            v.type = TCHAR;
+            v.c = c;
+            return v;
+        }
+        static Value fromByte(char c) {
+            Value v = Value();
+            v.type = TBYTE;
+            v.uc = c;
+            return v;
         }
         size_t serialize(char* buf) {
             size_t l;
@@ -251,8 +290,8 @@ namespace SimpleConfig {
                 case TFALSE:
                 case TNONE:
                     return 1;
-                case TFLOAT:
-                    *(double*)&buf[1] = this->f;
+                case TDOUBLE:
+                    *(double*)&buf[1] = this->d;
                     return sizeof(double)+1;
                 case TINTEGER:
                     *(long long*)&buf[1] = this->i;
@@ -270,6 +309,17 @@ namespace SimpleConfig {
                         memcpy(&buf[1], this->s, l);
                     }
                     return l + 1;
+                case TFLOAT:
+                    *(float*)&buf[1] = this->f;
+                    return sizeof(float)+1;
+                case TCHAR:
+                    buf[1] = this->c;
+                    return 2;
+                case TBYTE:
+                    buf[1] = this->uc;
+                    return 2;
+                default:
+                    break;
             }
             return 1;
         }
@@ -277,19 +327,28 @@ namespace SimpleConfig {
             return type == TTRUE || type == TFALSE;
         }
         bool isInteger() {
-            return type == TINTEGER;
+            return type == TINTEGER || type == TUNSIGNED;
         }
-        bool isUnsigned() {
-            return type == TUNSIGNED;
+        bool isDouble() {
+            return type == TDOUBLE;
         }
         bool isFloat() {
             return type == TFLOAT;
         }
+        bool isFloating() {
+            return isFloat() || isDouble();
+        }
         bool isNumber() {
-            return isInteger() || isUnsigned() || isFloat();
+            return isInteger() || isFloating();
         }
         bool isString() {
             return type == TSTRING;
+        }
+        bool isChar() {
+            return type == TCHAR;
+        }
+        bool isByte() {
+            return type == TBYTE || isChar();
         }
         bool getBool() {
             if (type == TFALSE) {
@@ -302,6 +361,8 @@ namespace SimpleConfig {
                 return this->i;
             } else if (type == TUNSIGNED) {
                 return this->u;
+            } else if (type == TDOUBLE) {
+                return this->d;
             } else if (type == TFLOAT) {
                 return this->f;
             }
@@ -312,102 +373,170 @@ namespace SimpleConfig {
                 return this->i;
             } else if (type == TUNSIGNED) {
                 return this->u;
+            } else if (type == TDOUBLE) {
+                return this->d;
             } else if (type == TFLOAT) {
                 return this->f;
             }
             return 0;
         }
         double getDouble() {
-            if (type == TFLOAT) {
-                return this->f;
+            if (type == TDOUBLE) {
+                return this->d;
             } else if (type == TINTEGER) {
                 return this->i;
             } else if (type == TUNSIGNED) {
                 return this->u;
+            } else if (type == TFLOAT) {
+                return this->f;
             }
             return NAN;
         }
-        char* getString() {
+        float getFloat() {
+            if (type == TDOUBLE) {
+                return this->d;
+            } else if (type == TINTEGER) {
+                return this->i;
+            } else if (type == TUNSIGNED) {
+                return this->u;
+            } else if (type == TFLOAT) {
+                return this->f;
+            }
+            return NAN;
+        }
+        const char* getString() {
             if (type == TSTRING) {
                 return this->s;
             }
             return nullptr;
         }
+        char getChar() {
+            if (type == TCHAR) {
+                return this->c;
+            }
+            return 0;
+        }
+        unsigned char getByte() {
+            if (isByte()) {
+                return this->uc;
+            }
+            return 0;
+        }
     };
     class Config {
-        public:
         Dictionary<Value> *dict;
-
+        public:
         Config() {
             dict = new Dictionary<Value>();
         }
 
-		inline bool isBool(const char *key) {
-			return dict->get(key).isBool();
-		}
-		inline bool isInteger(const char *key) {
-			return dict->get(key).isInteger();
-		}
-		inline bool isUnsigned(const char *key) {
-			return dict->get(key).isUnsigned();
-		}
-		inline bool isFloat(const char *key) {
-			return dict->get(key).isFloat();
-		}
-		inline bool isNumber(const char *key) {
-			return dict->get(key).isNumber();
-		}
-		inline bool isString(const char *key) {
-			return dict->get(key).isString();
-		}
-        inline bool getBool(const char *key) {
+        bool getBool(const char* key) {
             return dict->get(key).getBool();
         }
-        inline long long getInteger(const char *key) {
+        long long getInteger(const char* key) {
             return dict->get(key).getInteger();
         }
-        inline size_t getUnsigned(const char *key) {
+        size_t getUnsigned(const char* key) {
             return dict->get(key).getUnsigned();
         }
-        inline double getDouble(const char *key) {
+        double getDouble(const char* key) {
             return dict->get(key).getDouble();
         }
-        inline char* getString(const char *key) {
+        float getFloat(const char* key) {
+            return dict->get(key).getFloat();
+        }
+        const char* getString(const char* key) {
             return dict->get(key).getString();
         }
-        inline void set(const char *key, Value v) {
+        char getChar(const char* key) {
+            return dict->get(key).getChar();
+        }
+        unsigned char getByte(const char* key) {
+            return dict->get(key).getByte();
+        }
+        void set(const char* key, Value v) {
             dict->get(key) = v;
         }
-        inline void setBool(const char *key, bool v) {
+        void setBool(const char* key, bool v) {
             dict->get(key) = Value::fromBool(v);
         }
-        inline void setInteger(const char *key, long long v) {
+        void setInteger(const char* key, long long v) {
             dict->get(key) = Value::fromInteger(v);
         }
-        inline void setUnsigned(const char *key, size_t v) {
+        void setUnsigned(const char* key, size_t v) {
             dict->get(key) = Value::fromUnsigned(v);
         }
-        inline void setFloat(const char *key, double v) {
+        void setDouble(const char* key, double v) {
             dict->get(key) = Value::fromDouble(v);
         }
-        inline void setString(const char* key, const char* v) {
+        void setFloat(const char* key, float v) {
+            dict->get(key) = Value::fromFloat(v);
+        }
+        void setChar(const char* key, char v) {
+            dict->get(key) = Value::fromChar(v);
+        }
+        void setByte(const char* key, unsigned char v) {
+            dict->get(key) = Value::fromByte(v);
+        }
+        void setString(const char* key, const char* v) {
             dict->get(key) = Value::fromString(v);
+        }
+        bool setRaw(const char* key, const void* v) {
+            if (!dict->has(key)) {
+                return false;
+            }
+            Value& val = dict->get(key);
+            switch (val.type) {
+                case Value::TNONE:
+                    break;
+                case Value::TTRUE:
+                case Value::TFALSE:
+                    val.type = *(bool*)v ? Value::TTRUE : Value::TFALSE;
+                    break;
+                case Value::TINTEGER:
+                    val.i = *(long long*)v;
+                    break;
+                case Value::TUNSIGNED:
+                    val.i = *(size_t*)v;
+                    break;
+                case Value::TDOUBLE:
+                    val.i = *(double*)v;
+                    break;
+                case Value::TSTRING:
+                    if (val.s != nullptr) {
+                        delete[] val.s;
+                    }
+                    val.s = _dupcstr(*(char**)v);
+                    break;
+                case Value::TFLOAT:
+                    val.f = *(float*)v;
+                    break;
+                case Value::TCHAR:
+                    val.c = *(char*)v;
+                    break;
+                case Value::TBYTE:
+                    val.uc = *(unsigned char*)v;
+                    break;
+                default:
+                    return false;
+            }
+            return true;
         }
 
 
         inline size_t length() {
             return dict->length();
         }
-        inline void add(const char *key, Value val) {
+        inline void add(const char* key, const Value val) {
             dict->add(key, val);
         }
 
         // Deserialize into this object from file fname. Returns true if successfully loaded.
         // Note: Will fail if the header is incorrect.
-        bool deserialize(const char *fname) {
+        bool deserialize(const char* fname) {
             std::ifstream fd;
             fd.open(fname);
-            if (fd.bad() || !fd.is_open()) {
+            if (!fd.is_open()) {
                 return false;
             }
             char buf[sizeof(CONFIG_FILE_HEADER)];
@@ -419,8 +548,6 @@ namespace SimpleConfig {
                 if (!res) {
                     dict->clear();
                 }
-            } else {
-                fd.seekg(0);
             }
             if (!res) {
                 // if no header or failed to decode as binary, try decoding as text
@@ -447,7 +574,7 @@ namespace SimpleConfig {
                 l = in->get() + 1;
                 in->read(buf, l);
                 Value value = Value::deserialize(buf, l);
-                dict->add(key, value);
+                dict->get(key) = value;
             }
             return true;
         }
@@ -456,11 +583,12 @@ namespace SimpleConfig {
         // Note: text format does not have a header.
         bool deserializeText(std::istream *in) {
             char buf[256];
+            char c = 0;
             while (!in->eof()) {
                 _skipspace(in);
-                char c = in->get();
+                c = in->get();
                 if (c == '"') {
-                    char *key = _deserializeString(in);
+                    char* key = _deserializeString(in);
                     if (key == nullptr) {
                         return false;
                     }
@@ -474,7 +602,7 @@ namespace SimpleConfig {
                         if (!success) {
                             return false;
                         }
-                        dict->add(key, v);
+                        dict->get(key) = v;
                         if (in->peek() == ',') {
                             in->get();
                         }
@@ -491,7 +619,7 @@ namespace SimpleConfig {
 
         // Serialize this object into file fname. Returns true if successful.
         // Note: writes a header.
-        bool serialize(const char *fname) {
+        bool serialize(const char* fname) {
             std::ofstream fd;
             fd.open(fname, std::ios::binary | std::ios::out);
             fd.write(CONFIG_FILE_HEADER, sizeof(CONFIG_FILE_HEADER));
@@ -508,7 +636,7 @@ namespace SimpleConfig {
             size_t nkeys = dict->length();
             for (size_t i=0; i<nkeys; i++) {
                 // printf("Index %llu\n", i);
-                char *key = dict->keys(i);
+                char* key = dict->keys(i);
                 // printf("Key: %s\n", key);
                 Value val = dict->values(i);
                 // printf("Value Type: %u Value: %016llX\n", val.type, val.u);
@@ -533,3 +661,4 @@ namespace SimpleConfig {
 
     };
 }
+#endif
