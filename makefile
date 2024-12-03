@@ -52,12 +52,12 @@ endif
 INCLUDES	:= $(patsubst %,-I%, $(INCLUDEDIRS:%/=%))
 
 # define the C libs
-LIBS		:= $(patsubst %,-L%, $(LIBDIRS:%/=%)) -lraylib
-ifeq ($(OS),Windows_NT)
-LIBS += -lopengl32 -lgdi32 -lwinmm
-else
-LIBS += -lm -lpthread -ldl -lrt
-endif
+# LIBS		:= $(patsubst %,-L%, $(LIBDIRS:%/=%)) -lraylib
+# ifeq ($(OS),Windows_NT)
+# LIBS += -lopengl32 -lgdi32 -lwinmm
+# else
+# LIBS += -lm -lpthread -ldl -lrt
+# endif
 
 # define the C source files
 SOURCES		:= $(wildcard $(patsubst %,%/*.cpp, $(SOURCEDIRS)))

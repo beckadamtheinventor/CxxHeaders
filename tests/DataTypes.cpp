@@ -1,7 +1,6 @@
 
 #include "../Array2D.hpp"
 #include "../Dictionary.hpp"
-#include "../DynamicArray.hpp"
 #include "../Registry.hpp"
 #include <chrono>
 #include <cstdlib>
@@ -33,15 +32,6 @@ int main() {
 	dict["Funny Joke"] = "<redacted>";
 	for (size_t i=0; i<dict.length(); i++) {
 		printf("(%llu) %s = %s\n", i, dict.keys(i), dict.values(i));
-	}
-
-	DynamicArray<size_t> arr;
-	printf("DynamicArray initial available: %llu\n", arr.available());
-	for (size_t i=0; i<512; i++) {
-		if (arr.available() == 0) {
-			printf("DynamicArray allocating more space\n");
-		}
-		arr.append(i);
 	}
 
 	Registry<RegisteredValue> reg;

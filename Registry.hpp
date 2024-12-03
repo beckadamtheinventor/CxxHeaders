@@ -6,17 +6,17 @@
 
 #include <cstdio>
 #include <exception>
+#include <vector>
 
-#include "DynamicArray.hpp"
 #include "Dictionary.hpp"
 
 template<class T>
 class Registry {
     protected:
-    DynamicArray<T*> _entries;
+    std::vector<T*> _entries;
     Dictionary<size_t> _dict;
     size_t nextid() {
-        return _entries.length();
+        return _entries.size();
     }
     public:
     /* Clear the registry.
@@ -24,20 +24,20 @@ class Registry {
      */
     void clear() {
         _dict.clear();
-        for (size_t i=0; i<_entries.length(); i++) {
+        for (size_t i=0; i<_entries.size(); i++) {
             delete _entries[i];
         }
     }
     /* Get the number of registered entries. */
     size_t length() {
-        return _entries.length();
+        return _entries.size();
     }
     /* Add a new key:value pair to the registry, returning a pointer to it.
      * Note that the value should be allocated with the "new" operator.
      */
     T* add(const char *key, T* v) {
         size_t id = nextid();
-        _entries.append(v);
+        _entries.push_back(v);
         _dict.append(key, id);
         return v;
     }
@@ -59,7 +59,7 @@ class Registry {
 	}
     /* Check if the registry contains an entry of a given integer id. */
 	bool has(size_t id) {
-		return id < _entries.length();
+		return id < _entries.size();
 	}
     /* Get a registry entry given an integer id. */
 	T* get(size_t id) {

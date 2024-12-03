@@ -1,11 +1,10 @@
 #pragma once
 
-#include "DynamicArray.hpp"
-
-template<class T, size_t CHUNK_SIZE=16, size_t MIN_ALLOC=16>
+#include <vector>
+template<class T, size_t CHUNK_SIZE=16>
 class SparseArray {
     protected:
-    DynamicArray<T[CHUNK_SIZE], MIN_ALLOC> _buckets;
+    std::vector<T[CHUNK_SIZE]> _buckets;
     public:
     SparseArray<T>() {}
     SparseArray<T>(T* values, unsigned int count) {
@@ -17,6 +16,6 @@ class SparseArray {
         return _buckets[i / CHUNK_SIZE][i % CHUNK_SIZE];
     }
     unsigned int length() {
-        return _buckets.length()*CHUNK_SIZE;
+        return _buckets.size()*CHUNK_SIZE;
     }
 };

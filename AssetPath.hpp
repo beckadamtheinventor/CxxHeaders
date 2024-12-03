@@ -4,7 +4,6 @@
  */
 #pragma once
 
-#include <cstdio>
 #include <cstring>
 static const char *assetPathTextures = "assets/textures/";
 static const char *assetPathObjects = "assets/objects/";

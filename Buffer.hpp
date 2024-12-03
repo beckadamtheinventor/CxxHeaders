@@ -50,11 +50,11 @@ class RWBuffer {
 		this->offset = offset;
 	}
 	inline void seek(size_t offset, int dir) {
-		if (dir == SEEK_START) {
+		if (dir == 0) {
 			this->offset = offset;
-		} else if (dir == SEEK_END) {
+		} else if (dir == 2) {
 			this->offset = len > offset ? 0 : len - offset;
-		} else if (dir == SEEK_CUR) {
+		} else if (dir == 1) {
 			this->offset += offset;
 			if (this->offset >= len) {
 				this->offset = len;
