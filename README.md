@@ -110,33 +110,6 @@ Member Functions:
 + `char* keys(size_t i)` Returns key at index i.
 
 
-
-## DynamicArray.hpp
-
-Simple Dynamic Array class.
-
-Constructors:
-+ `DynamicArray<T, MIN_ALLOC=256>()` Construct an empty Dynamic Array.
-+ `DynamicArray<T, MIN_ALLOC=256>(size_t size)` Construct a Dynamic Array with size elements allocated.
-+ `DynamicArray<T, MIN_ALLOC=256>(T* elements, size_t size)` Construct a Dynamic Array from existing elements.
-+ `DynamicArray<T, MIN_ALLOC>(DynamicArray& other)` Construct (deep copy) a Dynamic Array from another Dynamic Array.
-
-Member Functions:
-+ `size_t length()` Return the number of items in the Array.
-+ `size_t available()` Return the number of allocated items in the Array.
-+ `void clear()` Clear the Array. Note: uses default constructor for T.
-+ `void resize(size_t size)` Resize the Array to allocate more or less items. Note: can be zero.
-+ `T& get(size_t i)` Get/Set an item in the Array. Note: can be outside the bounds of the array to add items. Use with care.
-+ `T& add(size_t i, T value)` Set an item in the array at a specified index. 
-+ `T& operator[](size_t i)` Same as get.
-+ `T& append(T value)` Add an item to the end of the Array.
-+ `void remove(size_t i)` Remove the item at index i. Note: copies all successive items back. Can be very slow.
-+ `void trim()` De-allocate unset allocated entries in the Array.
-+ `T* collapse()` Return a pointer to a trimmed copy of the Array's contents.
-+ `operator T*()` Return a pointer to the Array's contents.
-
-
-
 ## SimpleConfig.hpp
 
 Simple binary serialized non-recursive configuration library.
