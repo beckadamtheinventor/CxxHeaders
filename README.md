@@ -11,7 +11,6 @@ License: MIT.
 
 + Array2D
 + Dictionary
-+ DynamicArray
 + SimpleConfig::Config
 
 
@@ -87,8 +86,6 @@ Member Fucntions:
 ## Dictionary.hpp
 
 Simple string keyed dictionary class. Saves keys for later use, ideal for serialization/deserialization.
-
-Relies on DynamicArray.hpp.
 
 Note that the index of a given key:value pair will likely not persist when the Dictionary is modified.
 
